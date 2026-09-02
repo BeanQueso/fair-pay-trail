@@ -103,12 +103,42 @@ export type Database = {
           },
         ]
       }
+      packet_downloads: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      global_impact_stats: {
+        Args: never
+        Returns: {
+          discrepancies_flagged: number
+          evidence_files: number
+          packets_built: number
+          timeline_events: number
+          workers: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
