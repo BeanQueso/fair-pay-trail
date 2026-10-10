@@ -6,9 +6,27 @@ import { brokeredPreviewStorage } from './previewAuthStorage';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+// VITE_ values are included in the browser bundle. Refuse privileged keys.
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error('Configure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.');
+}
+const isPrivilegedKey = (value: string): boolean => {
+  if (value.startsWith('sb_secret_')) return true;
+  try {
+    const payload = value.split('.')[1];
+    return !!payload && JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))).role === 'service_role';
+  } catch {
+    return false;
+  }
+};
+if (isPrivilegedKey(SUPABASE_PUBLISHABLE_KEY)) {
+  throw new Error('Use a publishable browser key. Server credentials must stay in Edge Function secrets.');
+}
+
+
 
 function isNewSupabaseApiKey(value: string): boolean {
-  return value.startsWith('sb_publishable_') || value.startsWith('sb_secret_');
+  return value.startsWith('sb_publishable_');
 }
 
 function createSupabaseFetch(supabaseKey: string): typeof fetch {
